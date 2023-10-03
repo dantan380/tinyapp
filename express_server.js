@@ -40,12 +40,16 @@ app.get("/urls/new", (req, res) => {            //Route to /urls/new for the pag
 app.post("/urls", (req, res) => {                   //Route after the POST submission of the new short url. User gets redirected to
     const randomString = generateRandomString();    // /urls/randomString which will show the long url entered and the 6 character
     urlDatabase[randomString] = req.body.longURL;   //alpha-numeric string.
-    console.log(urlDatabase);
     res.redirect(`/urls/${randomString}`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
     delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+});
+
+app.post("/urls/:id", (req, res) => {
+    urlDatabase[req.params.id] = req.body.longURL;
     res.redirect("/urls");
 });
 
@@ -55,7 +59,7 @@ app.get("/urls/:id", (req, res) => {            //Route to /urls/:id, ":id" bein
         longURL: urlDatabase[req.params.id]
     };
     res.render("urls_show", templateVars);
-})
+});
 
 app.get("/u/:id", (req, res) => {               //Route to /u/:id which will redirect the user to the long url by using the short
     const longURL = urlDatabase[req.params.id]; //url.
