@@ -44,6 +44,11 @@ app.post("/urls", (req, res) => {                   //Route after the POST submi
     res.redirect(`/urls/${randomString}`);
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+});
+
 app.get("/urls/:id", (req, res) => {            //Route to /urls/:id, ":id" being a place holder for Express to see what path
     const templateVars = {                      //matches this pattern.
         id: req.params.id, 
