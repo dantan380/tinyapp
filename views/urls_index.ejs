@@ -31,7 +31,7 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id] %></td>   <!-- Add form tag around what is interacting with the method and action of the form.-->
               <td><form method="POST" action="/urls/<%= id %>/delete"><button type="submit" class="btn btn-outline-primary"> Delete </button></form></td>
             </tr>
           <% } %>
