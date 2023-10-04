@@ -13,6 +13,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+    uyh87l: {
+      id: "uyh87l",
+      email: "a@a.com",
+      password: "1234",
+    },
+    nb32s0: {
+      id: "nb32s0",
+      email: "b@b.com",
+      password: "5678",
+    },
+  };
+
 const generateRandomString = function() {
     const result = Math.random().toString(36).slice(7); //Function to generate a random 6 character alpha-numeric string.
     return result;
@@ -30,17 +43,60 @@ app.get("/hello", (req, res) => {
     res.send("<html><body>Hello <b>World</b></body></html>\n");
   });
 
+app.get("/register", (req, res) =>{
+    const templateVars = {
+        user: users["id"],
+    }
+    res.render("urls_register", templateVars);
+});
+
+app.post("/register", (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    if (!email || !password) {
+        return res.status(400).send("Please provide a valid email address and a password");
+    }
+
+    let foundUser = null;
+
+    for (const userId in users) {
+        const user = users[userId];
+        if (user.email === email) {
+            foundUser = user;
+        }
+    }
+
+    if (foundUser) {
+        return res.status(400).send("This email is currently registered with an account. Please enter a different email");
+    }
+
+    const id = generateRandomString();
+
+    const user = {
+        id: id,
+        email: email,
+        password: password
+    };
+
+    users[id] = user;
+    res.cookie("user_id", id);
+    console.log(users);
+    res.redirect("/urls");
+});
+
 app.get("/urls", (req, res) => {
     const templateVars = {
         urls: urlDatabase,
-        username: req.cookies["username"] 
-    };                                              //Route to /urls shows all urls in urlDatabase, but formatted with html 
+        user: users[req.cookies["user_id"]]
+    };
+    console.log(templateVars.user);                                              //Route to /urls shows all urls in urlDatabase, but formatted with html 
         res.render("urls_index", templateVars);     //from "urls_index.ejs". templeVars has been defined so the ejs file can access
 });                                                 //those variabls.
 
 app.get("/urls/new", (req, res) => {            //Route to /urls/new for the page for creating new short urls.
     const templateVars = {
-        username: req.cookies["username"]
+        user: users[req.cookies["user_id"]],
     }
     res.render("urls_new", templateVars);
 });
@@ -63,7 +119,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {            //Route to /urls/:id, ":id" being a place holder for Express to see what path
     const templateVars = {  
-        username: req.cookies["username"],                    //matches this pattern.
+        user: users[req.cookies["user_id"]],                    //matches this pattern.
         id: req.params.id, 
         longURL: urlDatabase[req.params.id]
     };
