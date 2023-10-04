@@ -63,8 +63,13 @@ app.get("/urls/:id", (req, res) => {            //Route to /urls/:id, ":id" bein
 
 app.get("/u/:id", (req, res) => {               //Route to /u/:id which will redirect the user to the long url by using the short
     const longURL = urlDatabase[req.params.id]; //url.
-    console.log(req.params.id);
     res.redirect(longURL);
+});
+
+app.post("/login", (req, res) => {
+    console.log(req.body.username);
+    res.cookie("username", req.body.username);
+    res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
