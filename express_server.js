@@ -1,8 +1,10 @@
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
+app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,12 +31,18 @@ app.get("/hello", (req, res) => {
   });
 
 app.get("/urls", (req, res) => {
-    const templateVars = {urls: urlDatabase };  //Route to /urls shows all urls in urlDatabase, but formatted with html 
-    res.render("urls_index", templateVars);     //from "urls_index.ejs". templeVars has been defined so the ejs file can access
-});                                             //those variabls.
+    const templateVars = {
+        urls: urlDatabase,
+        username: req.cookies["username"] 
+    };                                              //Route to /urls shows all urls in urlDatabase, but formatted with html 
+        res.render("urls_index", templateVars);     //from "urls_index.ejs". templeVars has been defined so the ejs file can access
+});                                                 //those variabls.
 
 app.get("/urls/new", (req, res) => {            //Route to /urls/new for the page for creating new short urls.
-    res.render("urls_new");
+    const templateVars = {
+        username: req.cookies["username"]
+    }
+    res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {                   //Route after the POST submission of the new short url. User gets redirected to
@@ -54,7 +62,8 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {            //Route to /urls/:id, ":id" being a place holder for Express to see what path
-    const templateVars = {                      //matches this pattern.
+    const templateVars = {  
+        username: req.cookies["username"],                    //matches this pattern.
         id: req.params.id, 
         longURL: urlDatabase[req.params.id]
     };
