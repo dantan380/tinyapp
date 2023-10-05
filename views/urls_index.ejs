@@ -17,7 +17,7 @@
   </head>
   <body>
     <%- include('partials/_header') %>
-    <main style="margin: 1em;">
+    <main style="margin: 1em">
       <h3>My URLs</h3>
       <table class="table">
         <thead>
@@ -30,16 +30,28 @@
         </thead>
         <tbody>
           <% for (let id in urls) { %>
-            <tr>
-              <td><%= id %></td>
-              <td><%= urls[id] %></td>   <!-- Add form tag around what is interacting with the method and action of the form.-->
-              <td><form method="GET" action="/urls/<%= id %>"><button type="submit" class="btn btn-outline-primary"> Edit </button></form></td>
-              <td><form method="POST" action="/urls/<%= id %>/delete"><button type="submit" class="btn btn-outline-primary"> Delete </button></form></td>
-            </tr>
+          <tr>
+            <td><%= id %></td>
+            <td><%= urls[id].longURL %></td>
+            <!-- Add form tag around what is interacting with the method and action of the form.-->
+            <td>
+              <form method="GET" action="/urls/<%= id %>">
+                <button type="submit" class="btn btn-outline-primary">
+                  Edit
+                </button>
+              </form>
+            </td>
+            <td>
+              <form method="POST" action="/urls/<%= id %>/delete">
+                <button type="submit" class="btn btn-outline-primary">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
           <% } %>
         </tbody>
       </table>
-    </form>
     </main>
     <!-- Bootstrap JS -->
     <script
