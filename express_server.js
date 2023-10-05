@@ -45,9 +45,13 @@ app.get("/hello", (req, res) => {
 
 app.get("/register", (req, res) =>{
     const templateVars = {
-        user: users["id"],
+        user: users[req.cookies["user_id"]],
     }
-    res.render("urls_register", templateVars);
+    if (!templateVars.user){
+        res.render("urls_register", templateVars);
+    }
+    console.log("redirected to urls");
+    res.redirect("/urls");
 });
 
 app.post("/register", (req, res) => {
@@ -134,7 +138,11 @@ app.get("/login", (req, res) => {
     const templateVars = {
         user: users[req.cookies["user_id"]]
     }
-    res.render("urls_login", templateVars);
+    if (!templateVars.user){
+        res.render("urls_login", templateVars);
+    }
+    console.log("Redirected to /urls");
+    res.redirect("/urls");
 })
 
 app.post("/login", (req, res) => {
