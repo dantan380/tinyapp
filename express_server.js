@@ -152,6 +152,20 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+    const url = urlDatabase[req.params.id];
+    if (!url) {
+        return res.status(400).send("URL does not exist.");
+    }
+
+    const user = users[req.cookies["user_id"]];
+    if (!user) {
+        return res.status(401).send("You must be logged in to edit this URL.");
+    }
+
+    if (user !== url.userID) {
+        return res.status(401).send("You do not own this URL.");
+    }
+    
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
 });
@@ -161,13 +175,16 @@ app.post("/urls/:id", (req, res) => {
     if (!url) {
         return res.status(400).send("URL does not exist.");
     }
+
     const user = users[req.cookies["user_id"]];
     if (!user) {
         return res.status(401).send("You must be logged in to edit this URL.");
     }
+
     if (user !== url.userID) {
         return res.status(401).send("You do not own this URL.");
     }
+
     urlDatabase[req.params.id].longURL = req.body.longURL;
     res.redirect("/urls");
 });
