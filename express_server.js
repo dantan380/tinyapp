@@ -9,8 +9,19 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: {
+    longURL:"http://www.lighthouselabs.ca",
+    userID: "uyh87l"
+},
+  sm5xK9: {
+    longURL: "http://www.google.com",
+    userID: "uyh87l"
+},
+
+sm7xK5: {
+    longURL: "http://www.twitter.com",
+    userID: "nb32s0"
+}
 };
 
 const users = {
@@ -30,6 +41,19 @@ const generateRandomString = function() {
     const result = Math.random().toString(36).slice(7); //Function to generate a random 6 character alpha-numeric string.
     return result;
 }
+
+const urlsForUser = function(id) {
+    
+    const filteredUrls = {};
+
+    Object.keys(urlDatabase).forEach(key => {
+        const url = urlDatabase[key];
+        if (url.userID === id) {
+            filteredUrls[key] = url;
+        }
+    });
+    return filteredUrls
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -91,16 +115,22 @@ app.post("/register", (req, res) => {
 
 app.get("/urls", (req, res) => {
     const templateVars = {
-        urls: urlDatabase,
+        urls: urlsForUser(req.cookies["user_id"]),
         user: users[req.cookies["user_id"]]
-    };                                               //Route to /urls shows all urls in urlDatabase, but formatted with html 
-    res.render("urls_index", templateVars);         //from "urls_index.ejs". templeVars has been defined so the ejs file can access
-});                                                 //those variabls.
+    };
+    if (!templateVars.user) {
+        return res.status(401).send("Must be logged in to see short URLs.");
+    }
 
-app.get("/urls/new", (req, res) => {            //Route to /urls/new for the page for creating new short urls.
+    //urlsForUser(templateVars.user);
+    res.render("urls_index", templateVars);         
+});                                                 
+
+app.get("/urls/new", (req, res) => {            
     const templateVars = {
         user: users[req.cookies["user_id"]],
     }
+
     if (!templateVars.user) {
         return res.redirect("/login");
     }
@@ -109,12 +139,15 @@ app.get("/urls/new", (req, res) => {            //Route to /urls/new for the pag
 });
 
 app.post("/urls", (req, res) => {                   //Route after the POST submission of the new short url. User gets redirected to
+    console.log("this is a test");
     const user = users[req.cookies["user_id"]];
     if (!user) {
         return res.status(401).send("Must be logged in to shorten URLs");
     }
-    const randomString = generateRandomString();    // /urls/randomString which will show the long url entered and the 6 character
-    urlDatabase[randomString] = req.body.longURL;   //alpha-numeric string.
+    const randomString = generateRandomString();
+    urlDatabase[randomString] = {}    // /urls/randomString which will show the long url entered and the 6 character
+    urlDatabase[randomString].longURL = req.body.longURL; 
+    urlDatabase[randomString].userID = user.id;  //alpha-numeric string.
     res.redirect(`/urls/${randomString}`);
 });
 
@@ -124,7 +157,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-    urlDatabase[req.params.id] = req.body.longURL;
+    urlDatabase[req.params.id].longURL = req.body.longURL;
     res.redirect("/urls");
 });
 
@@ -132,13 +165,17 @@ app.get("/urls/:id", (req, res) => {            //Route to /urls/:id, ":id" bein
     const templateVars = {  
         user: users[req.cookies["user_id"]],                    //matches this pattern.
         id: req.params.id, 
-        longURL: urlDatabase[req.params.id]
+        longURL: urlDatabase[req.params.id].longURL
     };
+    console.log(templateVars);
     res.render("urls_show", templateVars);
 });
 
-app.get("/u/:id", (req, res) => {               //Route to /u/:id which will redirect the user to the long url by using the short
-    const longURL = urlDatabase[req.params.id]; //url.
+app.get("/u/:id", (req, res) => {                       //Route to /u/:id which will redirect the user to the long url by using the short
+    const longURL = urlDatabase[req.params.id].longURL; //url.
+    if (!longURL) {
+        return res.status(400).send("Short URL does not exist");
+    }
     res.redirect(longURL);
 });
 
@@ -186,7 +223,7 @@ app.post("/logout", (req, res) => {
     res.clearCookie("user_id")
     console.log(users);
     res.redirect("/login");
-})
+});
 
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}!`);
