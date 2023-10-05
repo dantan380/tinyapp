@@ -89,9 +89,8 @@ app.get("/urls", (req, res) => {
     const templateVars = {
         urls: urlDatabase,
         user: users[req.cookies["user_id"]]
-    };
-    console.log(templateVars.user);                                              //Route to /urls shows all urls in urlDatabase, but formatted with html 
-        res.render("urls_index", templateVars);     //from "urls_index.ejs". templeVars has been defined so the ejs file can access
+    };                                               //Route to /urls shows all urls in urlDatabase, but formatted with html 
+    res.render("urls_index", templateVars);         //from "urls_index.ejs". templeVars has been defined so the ejs file can access
 });                                                 //those variabls.
 
 app.get("/urls/new", (req, res) => {            //Route to /urls/new for the page for creating new short urls.
@@ -131,15 +130,46 @@ app.get("/u/:id", (req, res) => {               //Route to /u/:id which will red
     res.redirect(longURL);
 });
 
+app.get("/login", (req, res) => {
+    const templateVars = {
+        user: users[req.cookies["user_id"]]
+    }
+    res.render("urls_login", templateVars);
+})
+
 app.post("/login", (req, res) => {
-    console.log(req.body.username);
-    res.cookie("username", req.body.username);
+   const email = req.body.email;
+    const password = req.body.password;
+    
+    if (!email || !password) {
+        return res.status(400).send("No user with that email address found");
+    }
+
+    let foundUser = null;
+
+    for (const userId in users) {
+        const user = users[userId];
+        if (user.email === email) {
+            foundUser = user;
+        }
+    }
+
+    if (!foundUser) {
+        return res.status(400).send("No user with that email exists.");
+    }
+
+    if (foundUser.password !== password) {
+        return res.status(400).send("Passwords do not match");
+    }
+
+    res.cookie("user_id", foundUser.id);
     res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-    res.clearCookie("username")
-    res.redirect("/urls");
+    res.clearCookie("user_id")
+    console.log(users);
+    res.redirect("/login");
 })
 
 app.listen(PORT, () => {
