@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -25,16 +26,6 @@ sm7xK5: {
 };
 
 const users = {
-    uyh87l: {
-      id: "uyh87l",
-      email: "a@a.com",
-      password: "1234",
-    },
-    nb32s0: {
-      id: "nb32s0",
-      email: "b@b.com",
-      password: "5678",
-    },
   };
 
 const generateRandomString = function() {
@@ -103,10 +94,12 @@ app.post("/register", (req, res) => {
 
     const id = generateRandomString();
 
+    const hash = bcrypt.hashSync(password, 10);
+
     const user = {
         id: id,
         email: email,
-        password: password
+        password: hash
     };
 
     users[id] = user;
@@ -165,7 +158,7 @@ app.post("/urls/:id/delete", (req, res) => {
     if (user !== url.userID) {
         return res.status(401).send("You do not own this URL.");
     }
-    
+
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
 });
@@ -251,7 +244,9 @@ app.post("/login", (req, res) => {
         return res.status(400).send("No user with that email exists.");
     }
 
-    if (foundUser.password !== password) {
+    const result = bcrypt.compareSync(password, foundUser.password)
+
+    if (!result) {
         return res.status(400).send("Passwords do not match");
     }
 
