@@ -48,7 +48,7 @@ app.get("/register", (req, res) =>{
         user: users[req.cookies["user_id"]],
     }
     if (!templateVars.user){
-        res.render("urls_register", templateVars);
+        return res.render("urls_register", templateVars);
     }
     console.log("redirected to urls");
     res.redirect("/urls");
@@ -101,10 +101,18 @@ app.get("/urls/new", (req, res) => {            //Route to /urls/new for the pag
     const templateVars = {
         user: users[req.cookies["user_id"]],
     }
+    if (!templateVars.user) {
+        return res.redirect("/login");
+    }
+
     res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {                   //Route after the POST submission of the new short url. User gets redirected to
+    const user = users[req.cookies["user_id"]];
+    if (!user) {
+        return res.status(401).send("Must be logged in to shorten URLs");
+    }
     const randomString = generateRandomString();    // /urls/randomString which will show the long url entered and the 6 character
     urlDatabase[randomString] = req.body.longURL;   //alpha-numeric string.
     res.redirect(`/urls/${randomString}`);
@@ -139,7 +147,7 @@ app.get("/login", (req, res) => {
         user: users[req.cookies["user_id"]]
     }
     if (!templateVars.user){
-        res.render("urls_login", templateVars);
+        return res.render("urls_login", templateVars);
     }
     console.log("Redirected to /urls");
     res.redirect("/urls");
