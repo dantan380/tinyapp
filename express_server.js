@@ -30,8 +30,7 @@ const urlDatabase = {
   }
 };
 
-const users = {
-};
+const users = {};
 
 const generateRandomString = function() {
   const result = Math.random().toString(36).slice(7); //Function to generate a random 6 character alpha-numeric string.
@@ -53,18 +52,6 @@ const urlsForUser = function(id) {
   return filteredUrls;
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.get("/register", (req, res) =>{
   const templateVars = {
     user: users[req.session.user_id],
@@ -72,7 +59,7 @@ app.get("/register", (req, res) =>{
   if (!templateVars.user) {
     return res.render("urls_register", templateVars);
   }
-  console.log("redirected to urls");
+  console.log("Redirected to /urls");
   res.redirect("/urls");
 });
 
@@ -235,7 +222,6 @@ app.post("/login", (req, res) => {
   if (!result) {
     return res.status(400).send("Passwords do not match");
   }
-  console.log(foundUser);
   req.session.user_id = foundUser.id;
   res.redirect("/urls");
 });
