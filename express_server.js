@@ -100,7 +100,6 @@ app.post("/register", (req, res) => {
 
   users[id] = user;
   req.session.user_id = id;
-  console.log(users);
   res.redirect("/urls");
 });
 
@@ -236,14 +235,13 @@ app.post("/login", (req, res) => {
   if (!result) {
     return res.status(400).send("Passwords do not match");
   }
-
+  console.log(foundUser);
   req.session.user_id = foundUser.id;
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  console.log(users);
   res.redirect("/login");
 });
 
